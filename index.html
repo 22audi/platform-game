@@ -5,6 +5,10 @@
     <title>platformgame</title>
     <script src="//cdn.jsdelivr.net/npm/phaser@3.15.1/dist/phaser.js"></script>
     <script>
+
+        var score = 0;
+        var scoreText;
+
         var config = {
             type: Phaser.AUTO,
             width: 800,
@@ -12,7 +16,7 @@
             physics: {
                 default: 'arcade',
                 arcade: {
-                    gravity: {y: 300},
+                    gravity: {y: 280},
                     debug: false
                 }
             },
@@ -34,6 +38,7 @@
             this.load.image('bomb', 'assets/bomb.png');
             this.load.spritesheet('dude', 'assets/dude.png', { frameWidth: 32, frameHeight: 48 });
             this.load.spritesheet('redguy', 'assets/redguy.png', { frameWidth: 457, frameHeight: 754 });
+
 
         }
 
@@ -59,29 +64,82 @@
             player.setCollideWorldBounds(true);
 
             this.anims.create({
-                key: 'left',
-                frames: this.anims.generateFrameNumbers('redguy', { start: 0, end: 3 }),
+                key: 'run',
+                frames: this.anims.generateFrameNumbers('redguy', { start: 0, end: 5 }),
                 frameRate: 10,
                 repeat: -1
             });
 
             this.anims.create({
                 key: 'turn',
-                frames: [ { key: 'redguy', frame: 4 } ],
+                frames: [ { key: 'redguy', frame: 5 } ],
                 frameRate: 20
             });
 
-            this.anims.create({
-                key: 'right',
-                frames: this.anims.generateFrameNumbers('redguy', { start: 5, end: 8 }),
-                frameRate: 10,
-                repeat: -1
+            stars = this.physics.add.group({
+                key: 'star',
+                repeat: 11,
+                setXY: { x: 12, y: 0, stepX: 70 }
             });
 
             this.physics.add.collider(player, platforms);
 
+            this.physics.add.collider(stars, platforms);
+
             cursors = this.input.keyboard.createCursorKeys();
 
+            stars.children.iterate(function (star) {
+
+                star.setBounceY(Phaser.Math.FloatBetween(0.4, 0.8));
+
+            });
+
+            this.physics.add.overlap(player, stars, collectStar, null, this);
+
+            function collectStar (player, star)
+            {
+                star.disableBody(true, true);
+
+                score += 1;
+                scoreText.setText('Stars: ' + score);
+
+                if (stars.countActive(true) === 0)
+                {
+                    stars.children.iterate(function (child) {
+
+                        child.enableBody(true, child.x, 0, true, true);
+
+                    });
+
+                    // Ternary
+                    var x = (player.x < 400) ? Phaser.Math.Between(400, 800) : Phaser.Math.Between(0, 400);
+
+                    var bomb = bombs.create(x, 16, 'bomb');
+                    bomb.setBounce(1);
+                    bomb.setCollideWorldBounds(true);
+                    bomb.setVelocity(Phaser.Math.Between(-200, 200), 20);
+
+                }
+            }
+
+            scoreText = this.add.text(16, 16, 'Stars: 0', { fontSize: '32px', fill: '#000' });
+
+            bombs = this.physics.add.group();
+
+            this.physics.add.collider(bombs, platforms);
+
+            this.physics.add.collider(player, bombs, hitBomb, null, this);
+
+            function hitBomb (player, bomb)
+            {
+                this.physics.pause();
+
+                player.setTint(0xff0000);
+
+                player.anims.play('turn');
+
+                gameOver = true;
+            }
         }
 
         function update ()
@@ -90,13 +148,17 @@
             {
                 player.setVelocityX(-160);
 
-                player.anims.play('left', true);
+                player.anims.play('run', true);
+
+                player.flipX = true;
             }
             else if (cursors.right.isDown)
             {
                 player.setVelocityX(160);
 
-                player.anims.play('right', true);
+                player.anims.play('run', true);
+
+                player.flipX = false;
             }
             else
             {
@@ -110,6 +172,7 @@
                 player.setVelocityY(-320);
             }
         }
+
     </script>
 </head>
 <body>
