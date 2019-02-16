@@ -38,6 +38,7 @@
             this.load.image('bomb', 'assets/bomb.png');
             this.load.spritesheet('dude', 'assets/dude.png', { frameWidth: 32, frameHeight: 48 });
             this.load.spritesheet('redguy', 'assets/redguy.png', { frameWidth: 457, frameHeight: 754 });
+            this.load.image('ratking', 'assets/ratking2.png');
 
 
         }
@@ -81,6 +82,8 @@
                 repeat: 11,
                 setXY: { x: 12, y: 0, stepX: 70 }
             });
+
+
 
             this.physics.add.collider(player, platforms);
 
@@ -140,7 +143,22 @@
 
                 gameOver = true;
             }
+
+            var ratKingSprite = this.add.sprite(100, 505, 'ratking');
+
+            this.tweens.add({
+                x: 700,
+                targets: ratKingSprite,
+                duration: 3000,
+                ease: 'Linear',
+                yoyo: true,
+                delay: 1000,
+                repeat: -1
+            });
+
+            this.physics.add.collider(player, ratKingSprite, hitBomb, null, this);
         }
+
 
         function update ()
         {
