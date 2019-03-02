@@ -39,12 +39,20 @@
             this.load.spritesheet('dude', 'assets/dude.png', { frameWidth: 32, frameHeight: 48 });
             this.load.spritesheet('redguy', 'assets/redguy.png', { frameWidth: 457, frameHeight: 754 });
             this.load.image('ratking', 'assets/ratking2.png');
-
-
+            this.load.audio('stars' , 'assets/341695__projectsu012__coins-1.wav');
+            this.load.audio('explode' , 'assets/187501__waveplay-old__drop-bomb-effect-4.wav');
+            this.load.audio('jump' , 'assets/341248__sharesynth__jump00.wav');
+            this.load.audio('hit' , 'assets/434462__dersuperanton__getting-hit-hugh.wav');
         }
 
-        function hitBomb (player, bomb)
+
+        function hitBomb (player)
         {
+
+            var sound = this.sound.add('hit');
+
+            sound.play();
+
             this.physics.pause();
 
             player.setTint(0xff0000);
@@ -112,6 +120,10 @@
 
             function collectStar (player, star)
             {
+                var sound = this.sound.add('stars');
+
+                sound.play();
+
                 star.disableBody(true, true);
 
                 score += 1;
@@ -119,10 +131,9 @@
 
                 if (stars.countActive(true) === 0)
                 {
+                    // Re-activate all stars and put them at the top of the screen
                     stars.children.iterate(function (child) {
-
                         child.enableBody(true, child.x, 0, true, true);
-
                     });
 
                     // Ternary
@@ -191,10 +202,19 @@
             if (cursors.up.isDown && player.body.touching.down)
             {
                 player.setVelocityY(-320);
+
+                var sound = this.sound.add('jump');
+
+                sound.play();
             }
 
-            if (score==1)
+            if (score==22)
             {
+
+                var sound = this.sound.add('explode');
+
+                sound.play();
+
                 ratKingSprite.visible = true;
                 this.physics.add.collider(player, ratKingSprite, hitBomb, null, this);
 
