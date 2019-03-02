@@ -43,6 +43,17 @@
 
         }
 
+        function hitBomb (player, bomb)
+        {
+            this.physics.pause();
+
+            player.setTint(0xff0000);
+
+            player.anims.play('turn');
+
+            gameOver = true;
+        }
+
         function create ()
         {
             this.add.image(400, 300, 'sky');
@@ -133,18 +144,9 @@
 
             this.physics.add.collider(player, bombs, hitBomb, null, this);
 
-            function hitBomb (player, bomb)
-            {
-                this.physics.pause();
 
-                player.setTint(0xff0000);
-
-                player.anims.play('turn');
-
-                gameOver = true;
-            }
-
-            var ratKingSprite = this.add.sprite(100, 505, 'ratking');
+            ratKingSprite = this.physics.add.sprite(100, 505, 'ratking');
+            ratKingSprite.visible = false;
 
             this.tweens.add({
                 x: 700,
@@ -156,7 +158,8 @@
                 repeat: -1
             });
 
-            this.physics.add.collider(player, ratKingSprite, hitBomb, null, this);
+            this.physics.add.collider(ratKingSprite, platforms);
+
         }
 
 
@@ -189,6 +192,19 @@
             {
                 player.setVelocityY(-320);
             }
+
+            if (score==1)
+            {
+                ratKingSprite.visible = true;
+                this.physics.add.collider(player, ratKingSprite, hitBomb, null, this);
+
+                var bomb = bombs.create(ratKingSprite.x, ratKingSprite.y, 'bomb');
+                bomb.setBounce(1);
+                bomb.setCollideWorldBounds(true);
+                bomb.setVelocity(Phaser.Math.Between(-200, 200), -275);
+
+            }
+
         }
 
     </script>
